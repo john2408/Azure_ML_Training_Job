@@ -58,8 +58,8 @@ RUN pip install --no-cache --upgrade \
             mlflow
 
 # Defines train.py as script entrypoint
-ENV SAGEMAKER_PROGRAM train.py
+#ENV SAGEMAKER_PROGRAM train.py
 
-COPY code/* /opt/ml/code/
+#COPY code/* /opt/ml/code/
 
-ENTRYPOINT ["python", "/opt/ml/code/main.py"]
+#ENTRYPOINT ["python", "/opt/ml/code/main.py"]

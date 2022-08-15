@@ -97,8 +97,8 @@ def train():
 
 
 if __name__ == "__main__":
-    if sys.argv[1] == "train":
-        train()
-    else:
-        print("Missing required argument 'train'.", file=sys.stderr)
-        sys.exit(1)
+    
+    train()
+
+    
+    

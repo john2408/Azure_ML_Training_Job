@@ -54,7 +54,7 @@ def attach_computing_target(ws: Workspace,
         print('Found existing compute target.')
     except ComputeTargetException:
         print('Creating a new compute target...')
-        compute_config = AmlCompute.provisioning_configuration(vm_size='STANDARD_NC6',
+        compute_config = AmlCompute.provisioning_configuration(vm_size='STANDARD_A2_V2',
                                                             max_nodes=2)
 
         # Create the cluster.
@@ -89,7 +89,7 @@ if __name__ == '__main__':
         config = json.load(f)
         print(config)
 
-    custom_docker_image = False
+    custom_docker_image = True
 
     ws = create_azure_connection(config)
 
