@@ -26,14 +26,24 @@ def create_azure_connection(config: dict) -> Workspace:
         return None
 
 
-def define_environment(env_name : str = "fastai2") -> Environment:
+def define_environment(env_name : str , 
+                     custom_docker_image: bool = False) -> Environment:
     
-    env = Environment(env_name)
+    try:
+        env = Environment(env_name)
 
-    env.docker.base_image = None
-    env.docker.base_dockerfile = "./Dockerfile"
+        if custom_docker_image:
 
-    return env
+            env.docker.base_image = None
+            env.docker.base_dockerfile = "./Dockerfile"
+
+        print("Environment sucessfully found", env)
+
+        return env
+
+    except:
+        
+        return None
 
 def attach_computing_target(ws: Workspace,
                             cluster_name: str = "gpu-cluster", 
@@ -45,7 +55,7 @@ def attach_computing_target(ws: Workspace,
     except ComputeTargetException:
         print('Creating a new compute target...')
         compute_config = AmlCompute.provisioning_configuration(vm_size='STANDARD_NC6',
-                                                            max_nodes=4)
+                                                            max_nodes=2)
 
         # Create the cluster.
         compute_target = ComputeTarget.create(ws, cluster_name, compute_config)
@@ -59,8 +69,10 @@ def attach_computing_target(ws: Workspace,
 
 
 def run_training_job(source_directory: str, 
+                    experiment_name: str,
                     ws : Workspace, 
                     env : Environment, 
+                    compute_target: ComputeTarget, 
                     script : str  =' train.py'):
 
     src = ScriptRunConfig(source_directory = source_directory,
@@ -68,7 +80,7 @@ def run_training_job(source_directory: str,
                         compute_target = compute_target,
                         environment = env)
 
-    run = Experiment(ws,'Tutorial-fastai').submit(src)
+    run = Experiment(ws, experiment_name).submit(src)
     run.wait_for_completion(show_output=True)
 
 if __name__ == '__main__':
@@ -77,16 +89,21 @@ if __name__ == '__main__':
         config = json.load(f)
         print(config)
 
+    custom_docker_image = False
 
     ws = create_azure_connection(config)
 
-    env = define_environment(env_name = "fastai2")
+    #env_name = "fastai2"
+    env = define_environment(env_name = config['env_name'], 
+                            custom_docker_image = custom_docker_image)
 
     compute_target = attach_computing_target(ws,
-                            cluster_name = "gpu-cluster", 
+                            cluster_name = config['cluster_name'], 
                             )
 
-    run_training_job(source_directory = 'fastai-example', 
+    run_training_job(source_directory = 'code', 
+                    experiment_name = config['experiment_name'],
                     ws = ws, 
                     env = env, 
-                    script = 'train.py')
+                    compute_target = compute_target, 
+                    script = 'main.py')
